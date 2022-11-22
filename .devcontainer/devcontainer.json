@@ -1,8 +1,10 @@
 {
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers-contrib/features/pre-commit:1": {},
 		"ghcr.io/dhoeric/features/google-cloud-cli:1": {}
 	},
 	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
-	"name": "wowless/byobcdn"
+	"name": "wowless/byobcdn",
+	"postCreateCommand": "pre-commit install --install-hooks"
 }
