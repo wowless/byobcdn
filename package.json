@@ -7,7 +7,8 @@
     "tact": "npx functions-framework --source=functions/tact"
   },
   "dependencies": {
-    "axios": "^1.2.0"
+    "axios": "^1.2.0",
+    "md5": "^2.3.0"
   },
   "jshintConfig": {
     "esversion": 8
