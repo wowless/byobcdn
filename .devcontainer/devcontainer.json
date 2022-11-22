@@ -1,0 +1,8 @@
+{
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/dhoeric/features/google-cloud-cli:1": {}
+	},
+	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+	"name": "wowless/byobcdn"
+}
