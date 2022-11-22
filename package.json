@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@google-cloud/functions-framework": "^3.1.2"
+  },
+  "scripts": {
+    "tact": "npx functions-framework --source=functions/tact"
+  },
+  "dependencies": {
+    "axios": "^1.2.0"
+  }
+}
