@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "tact": "npx functions-framework"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.1.2",
+    "@google-cloud/storage": "^6.7.0",
+    "axios": "^1.2.0",
+    "md5": "^2.3.0"
+  }
+}
