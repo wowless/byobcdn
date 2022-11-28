@@ -3,7 +3,7 @@ const functions = require('@google-cloud/functions-framework');
 const md5 = require('md5');
 const storage = require('@google-cloud/storage');
 
-const bucket = new storage.Storage().bucket('byobcdn.wowless.dev');
+const bucket = new storage.Storage().bucket(process.env.BYOBCDN_BUCKET);
 
 functions.http('function', async (req, res) => {
   const q = req.query;

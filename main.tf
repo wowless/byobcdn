@@ -1,16 +1,5 @@
-terraform {
-  cloud {
-    organization = "wowless-dev"
-    workspaces {
-      name = "byobcdn"
-    }
-  }
-}
-
-provider "google" {
-  project = "www-wowless-dev"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+variable "bucket" {
+  type = string
 }
 
 resource "google_sourcerepo_repository" "byobcdn" {
@@ -32,7 +21,7 @@ data "google_iam_policy" "storage" {
 }
 
 resource "google_storage_bucket" "storage" {
-  name                        = "byobcdn.wowless.dev"
+  name                        = var.bucket
   location                    = "US"
   uniform_bucket_level_access = true
 }
@@ -49,8 +38,10 @@ resource "google_cloudfunctions_function" "byobcdn-tact" {
   available_memory_mb   = 256
   trigger_http          = true
   service_account_email = google_service_account.byobcdn-tact-runner.email
-  environment_variables = {}
   labels                = {}
+  environment_variables = {
+    BYOBCDN_BUCKET = var.bucket
+  }
   source_repository {
     url = "https://source.developers.google.com/${google_sourcerepo_repository.byobcdn.id}/moveable-aliases/main/paths/functions/tact"
   }
