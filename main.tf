@@ -2,6 +2,18 @@ variable "bucket" {
   type = string
 }
 
+locals {
+  products = [
+    "wow",
+    "wow_beta",
+    "wow_classic",
+    "wow_classic_era",
+    "wow_classic_era_ptr",
+    "wow_classic_ptr",
+    "wowt",
+  ]
+}
+
 resource "google_service_account" "byobcdn-tact-runner" {
   account_id   = "byobcdn-tact-runner"
   display_name = "byobcdn-tact-runner"
@@ -79,15 +91,7 @@ resource "google_cloudfunctions_function_iam_policy" "byobcdn-tact" {
 }
 
 resource "google_cloud_scheduler_job" "byobcdn-tact-versions-crons" {
-  for_each = {
-    wow                 = {}
-    wow_beta            = {}
-    wow_classic         = {}
-    wow_classic_era     = {}
-    wow_classic_era_ptr = {}
-    wow_classic_ptr     = {}
-    wowt                = {}
-  }
+  for_each         = toset(local.products)
   name             = "byobcdn-tact-${each.key}"
   schedule         = "* * * * *"
   time_zone        = "America/Chicago"
