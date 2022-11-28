@@ -2,10 +2,6 @@ variable "bucket" {
   type = string
 }
 
-resource "google_sourcerepo_repository" "byobcdn" {
-  name = "github_wowless_byobcdn"
-}
-
 resource "google_service_account" "byobcdn-tact-runner" {
   account_id   = "byobcdn-tact-runner"
   display_name = "byobcdn-tact-runner"
@@ -45,9 +41,6 @@ resource "google_cloudfunctions_function" "byobcdn-tact" {
     ignore_changes = [
       labels["deployment-tool"],
     ]
-  }
-  source_repository {
-    url = "https://source.developers.google.com/${google_sourcerepo_repository.byobcdn.id}/moveable-aliases/main/paths/functions/tact"
   }
   timeouts {}
 }
