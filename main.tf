@@ -35,12 +35,16 @@ resource "google_cloudfunctions_function" "byobcdn-tact" {
   name                  = "byobcdn-tact"
   runtime               = "nodejs18"
   entry_point           = "function"
-  available_memory_mb   = 256
+  available_memory_mb   = 128
   trigger_http          = true
   service_account_email = google_service_account.byobcdn-tact-runner.email
-  labels                = {}
   environment_variables = {
     BYOBCDN_BUCKET = var.bucket
+  }
+  lifecycle {
+    ignore_changes = [
+      labels["deployment-tool"],
+    ]
   }
   source_repository {
     url = "https://source.developers.google.com/${google_sourcerepo_repository.byobcdn.id}/moveable-aliases/main/paths/functions/tact"
