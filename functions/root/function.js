@@ -16,6 +16,8 @@ const regions = [
   "cn",
   "eu",
   "kr",
+  "sg",
+  "tw",
   "us",
 ];
 
