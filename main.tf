@@ -122,6 +122,20 @@ resource "google_pubsub_topic" "byobcdn-root" {
   name = "byobcdn-root"
 }
 
+data "google_iam_policy" "byobcdn-root-pubsub" {
+  binding {
+    members = [
+      "serviceAccount:${google_service_account.byobcdn-root-runner.email}",
+    ]
+    role = "roles/pubsub.publisher"
+  }
+}
+
+resource "google_pubsub_topic_iam_policy" "byobcdn-root" {
+  policy_data = data.google_iam_policy.byobcdn-root-pubsub.policy_data
+  topic = google_pubsub_topic.byobcdn-root.name
+}
+
 resource "google_cloudfunctions_function" "byobcdn-root" {
   name                  = "byobcdn-root"
   runtime               = "nodejs18"
