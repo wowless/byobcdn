@@ -2,18 +2,6 @@ variable "bucket" {
   type = string
 }
 
-locals {
-  products = [
-    "wow",
-    "wow_beta",
-    "wow_classic",
-    "wow_classic_era",
-    "wow_classic_era_ptr",
-    "wow_classic_ptr",
-    "wowt",
-  ]
-}
-
 resource "google_service_account" "byobcdn-tact-runner" {
   account_id   = "byobcdn-tact-runner"
   display_name = "byobcdn-tact-runner"
@@ -88,29 +76,6 @@ data "google_iam_policy" "byobcdn-tact" {
 resource "google_cloudfunctions_function_iam_policy" "byobcdn-tact" {
   cloud_function = google_cloudfunctions_function.byobcdn-tact.name
   policy_data    = data.google_iam_policy.byobcdn-tact.policy_data
-}
-
-resource "google_cloud_scheduler_job" "byobcdn-tact-versions-crons" {
-  for_each         = toset(local.products)
-  name             = "byobcdn-tact-${each.key}"
-  schedule         = "* * * * *"
-  time_zone        = "America/Chicago"
-  attempt_deadline = "50s"
-  http_target {
-    http_method = "POST"
-    uri         = "${google_cloudfunctions_function.byobcdn-tact.https_trigger_url}/?product=${each.key}&endpoint=versions"
-    oidc_token {
-      audience              = google_cloudfunctions_function.byobcdn-tact.https_trigger_url
-      service_account_email = google_service_account.byobcdn-tact-invoker.email
-    }
-  }
-  retry_config {
-    max_backoff_duration = "3600s"
-    max_doublings        = 5
-    max_retry_duration   = "0s"
-    min_backoff_duration = "5s"
-    retry_count          = 0
-  }
 }
 
 resource "google_service_account" "byobcdn-root-runner" {
