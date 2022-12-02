@@ -5,11 +5,10 @@ const storage = require('@google-cloud/storage');
 
 const bucket = new storage.Storage().bucket(process.env.BYOBCDN_BUCKET);
 
-functions.http('function', async (req, res) => {
-  const q = req.query;
-  const result = await axios.get(`http://us.patch.battle.net:1119/${q.product}/${q.endpoint}`);
+functions.cloudEvent('function', async (cloudEvent) => {
+  const q = JSON.parse(Buffer.from(cloudEvent.data.message.data, 'base64').toString());
+  const result = await axios.get(`http://${q.region}.patch.battle.net:1119/${q.product}/${q.endpoint}`);
   const hash = md5(result.data);
-  const path = `byobcdn/tact/${q.product}/${q.endpoint}/${hash}`;
+  const path = `byobcdn/tact/${q.region}/${q.product}/${q.endpoint}/${hash}`;
   await bucket.file(path).save(result.data);
-  res.send(`gs://${bucket.name}/${path}\n`);
 });
