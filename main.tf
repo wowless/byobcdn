@@ -133,7 +133,7 @@ data "google_iam_policy" "byobcdn-root-pubsub" {
 
 resource "google_pubsub_topic_iam_policy" "byobcdn-root" {
   policy_data = data.google_iam_policy.byobcdn-root-pubsub.policy_data
-  topic = google_pubsub_topic.byobcdn-root.name
+  topic       = google_pubsub_topic.byobcdn-root.name
 }
 
 resource "google_cloudfunctions_function" "byobcdn-root" {
