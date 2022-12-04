@@ -275,3 +275,22 @@ resource "google_cloudfunctions_function_iam_policy" "byobcdn-watch" {
   cloud_function = google_cloudfunctions_function.byobcdn-watch.name
   policy_data    = data.google_iam_policy.byobcdn-watch.policy_data
 }
+
+resource "google_cloud_tasks_queue" "byobcdn-fetch" {
+  name     = "byobcdn-fetch"
+  location = "us-central1"
+}
+
+data "google_iam_policy" "byobcdn-fetch-tasks-queue" {
+  binding {
+    members = [
+      "serviceAccount:${google_service_account.byobcdn-watch-runner.email}",
+    ]
+    role = "roles/cloudtasks.enqueuer"
+  }
+}
+
+resource "google_cloud_tasks_queue_iam_policy" "byobcdn-fetch" {
+  name        = google_cloud_tasks_queue.byobcdn-fetch.name
+  policy_data = data.google_iam_policy.byobcdn-fetch-tasks-queue.policy_data
+}
