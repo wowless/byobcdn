@@ -252,7 +252,10 @@ resource "google_cloudfunctions_function" "byobcdn-watch" {
   available_memory_mb   = 128
   service_account_email = google_service_account.byobcdn-watch-runner.email
   environment_variables = {
-    BYOBCDN_BUCKET = var.bucket
+    BYOBCDN_BUCKET         = var.bucket
+    BYOBCDN_FETCH_ENDPOINT = google_cloudfunctions_function.byobcdn-fetch.https_trigger_url
+    BYOBCDN_FETCH_INVOKER  = google_service_account.byobcdn-fetch-invoker.email
+    BYOBCDN_FETCH_QUEUE    = google_cloud_tasks_queue.byobcdn-fetch.id
   }
   event_trigger {
     event_type = "google.storage.object.finalize"

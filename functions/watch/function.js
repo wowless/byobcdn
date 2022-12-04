@@ -7,7 +7,7 @@ const taskclient = new tasks.CloudTasksClient();
 
 async function mktask(body) {
   return await taskclient.createTask({
-    parent: taskclient.queuePath('www-wowless-dev', 'us-central1', 'byobcdn-fetch'),
+    parent: process.env.BYOBCDN_FETCH_QUEUE,
     task: {
       httpRequest: {
         body: Buffer.from(JSON.stringify(body)).toString('base64'),
@@ -16,9 +16,9 @@ async function mktask(body) {
         },
         httpMethod: 'POST',
         oidcToken: {
-          serviceAccountEmail: 'byobcdn-fetch-invoker@www-wowless-dev.iam.gserviceaccount.com',
+          serviceAccountEmail: process.env.BYOBCDN_FETCH_INVOKER,
         },
-        url: 'https://us-central1-www-wowless-dev.cloudfunctions.net/byobcdn-fetch',
+        url: process.env.BYOBCDN_FETCH_ENDPOINT,
       },
     },
   });
