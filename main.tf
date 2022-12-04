@@ -146,3 +146,35 @@ resource "google_cloud_scheduler_job" "byobcdn-root" {
     retry_count          = 0
   }
 }
+
+resource "google_service_account" "byobcdn-fetch-runner" {
+  account_id   = "byobcdn-fetch-runner"
+  display_name = "byobcdn-fetch-runner"
+}
+
+resource "google_cloudfunctions_function" "byobcdn-fetch" {
+  name                  = "byobcdn-fetch"
+  runtime               = "nodejs18"
+  entry_point           = "function"
+  available_memory_mb   = 128
+  trigger_http          = true
+  max_instances         = 5
+  timeout               = 5
+  service_account_email = google_service_account.byobcdn-fetch-runner.email
+  environment_variables = {
+    BYOBCDN_BUCKET = var.bucket
+  }
+  lifecycle {
+    ignore_changes = [
+      labels["deployment-tool"],
+    ]
+  }
+  timeouts {}
+}
+
+data "google_iam_policy" "byobcdn-fetch" {}
+
+resource "google_cloudfunctions_function_iam_policy" "byobcdn-fetch" {
+  cloud_function = google_cloudfunctions_function.byobcdn-fetch.name
+  policy_data    = data.google_iam_policy.byobcdn-fetch.policy_data
+}
