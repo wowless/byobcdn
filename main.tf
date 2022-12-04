@@ -7,14 +7,35 @@ resource "google_service_account" "byobcdn-fetch-runner" {
   display_name = "byobcdn-fetch-runner"
 }
 
+data "google_iam_policy" "byobcdn-fetch-runner" {}
+
+resource "google_service_account_iam_policy" "byobcdn-fetch-runner" {
+  policy_data        = data.google_iam_policy.byobcdn-fetch-runner.policy_data
+  service_account_id = google_service_account.byobcdn-fetch-runner.name
+}
+
 resource "google_service_account" "byobcdn-tact-runner" {
   account_id   = "byobcdn-tact-runner"
   display_name = "byobcdn-tact-runner"
 }
 
+data "google_iam_policy" "byobcdn-tact-runner" {}
+
+resource "google_service_account_iam_policy" "byobcdn-tact-runner" {
+  policy_data        = data.google_iam_policy.byobcdn-tact-runner.policy_data
+  service_account_id = google_service_account.byobcdn-tact-runner.name
+}
+
 resource "google_service_account" "byobcdn-watch-runner" {
   account_id   = "byobcdn-watch-runner"
   display_name = "byobcdn-watch-runner"
+}
+
+data "google_iam_policy" "byobcdn-watch-runner" {}
+
+resource "google_service_account_iam_policy" "byobcdn-watch-runner" {
+  policy_data        = data.google_iam_policy.byobcdn-watch-runner.policy_data
+  service_account_id = google_service_account.byobcdn-watch-runner.name
 }
 
 data "google_iam_policy" "storage" {
@@ -74,6 +95,13 @@ resource "google_cloudfunctions_function_iam_policy" "byobcdn-tact" {
 resource "google_service_account" "byobcdn-root-runner" {
   account_id   = "byobcdn-root-runner"
   display_name = "byobcdn-root-runner"
+}
+
+data "google_iam_policy" "byobcdn-root-runner" {}
+
+resource "google_service_account_iam_policy" "byobcdn-root-runner" {
+  policy_data        = data.google_iam_policy.byobcdn-root-runner.policy_data
+  service_account_id = google_service_account.byobcdn-root-runner.name
 }
 
 resource "google_pubsub_topic" "byobcdn-root" {
@@ -187,6 +215,20 @@ resource "google_cloudfunctions_function" "byobcdn-fetch" {
 resource "google_service_account" "byobcdn-fetch-invoker" {
   account_id   = "byobcdn-fetch-invoker"
   display_name = "byobcdn-fetch-invoker"
+}
+
+data "google_iam_policy" "byobcdn-fetch-invoker" {
+  binding {
+    members = [
+      "serviceAccount:${google_service_account.byobcdn-watch-runner.email}",
+    ]
+    role = "roles/iam.serviceAccountUser"
+  }
+}
+
+resource "google_service_account_iam_policy" "byobcdn-fetch-invoker" {
+  policy_data        = data.google_iam_policy.byobcdn-fetch-invoker.policy_data
+  service_account_id = google_service_account.byobcdn-fetch-invoker.name
 }
 
 data "google_iam_policy" "byobcdn-fetch" {
