@@ -41,14 +41,14 @@ resource "google_service_account_iam_policy" "byobcdn-watch-runner" {
 data "google_iam_policy" "storage" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-fetch-runner.email}",
-      "serviceAccount:${google_service_account.byobcdn-tact-runner.email}",
+      google_service_account.byobcdn-fetch-runner.member,
+      google_service_account.byobcdn-tact-runner.member,
     ]
     role = "roles/storage.objectAdmin"
   }
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-watch-runner.email}",
+      google_service_account.byobcdn-watch-runner.member,
     ]
     role = "roles/storage.objectViewer"
   }
@@ -111,7 +111,7 @@ resource "google_pubsub_topic" "byobcdn-root" {
 data "google_iam_policy" "byobcdn-root-pubsub-topic" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-root-runner.email}",
+      google_service_account.byobcdn-root-runner.member,
     ]
     role = "roles/pubsub.publisher"
   }
@@ -145,7 +145,7 @@ resource "google_service_account" "byobcdn-root-invoker" {
 data "google_iam_policy" "byobcdn-root-invoker" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-root-runner.email}",
+      google_service_account.byobcdn-root-runner.member,
     ]
     role = "roles/iam.serviceAccountUser"
   }
@@ -159,7 +159,7 @@ resource "google_service_account_iam_policy" "byobcdn-root-invoker" {
 data "google_iam_policy" "byobcdn-root" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-root-invoker.email}",
+      google_service_account.byobcdn-root-invoker.member,
     ]
     role = "roles/cloudfunctions.invoker"
   }
@@ -220,7 +220,7 @@ resource "google_service_account" "byobcdn-fetch-invoker" {
 data "google_iam_policy" "byobcdn-fetch-invoker" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-watch-runner.email}",
+      google_service_account.byobcdn-watch-runner.member,
     ]
     role = "roles/iam.serviceAccountUser"
   }
@@ -234,7 +234,7 @@ resource "google_service_account_iam_policy" "byobcdn-fetch-invoker" {
 data "google_iam_policy" "byobcdn-fetch" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-fetch-invoker.email}",
+      google_service_account.byobcdn-fetch-invoker.member,
     ]
     role = "roles/cloudfunctions.invoker"
   }
@@ -287,7 +287,7 @@ resource "google_cloud_tasks_queue" "byobcdn-fetch" {
 data "google_iam_policy" "byobcdn-fetch-tasks-queue" {
   binding {
     members = [
-      "serviceAccount:${google_service_account.byobcdn-watch-runner.email}",
+      google_service_account.byobcdn-watch-runner.member,
     ]
     role = "roles/cloudtasks.enqueuer"
   }
