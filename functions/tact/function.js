@@ -10,5 +10,15 @@ functions.cloudEvent('function', async (cloudEvent) => {
   const result = await axios.get(`http://${q.region}.patch.battle.net:1119/${q.product}/${q.endpoint}`);
   const hash = md5(result.data);
   const path = `byobcdn/tact/${q.region}/${q.product}/${q.endpoint}/${hash}`;
-  await bucket.file(path).save(result.data);
+  try {
+    await bucket.file(path).save(result.data, {
+      preconditionOpts: {
+        ifGenerationMatch: 0,
+      }
+    });
+  } catch (error) {
+    if (error.code != 412) {
+      throw error;
+    }
+  }
 });
