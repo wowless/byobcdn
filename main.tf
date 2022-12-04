@@ -2,17 +2,34 @@ variable "bucket" {
   type = string
 }
 
+resource "google_service_account" "byobcdn-fetch-runner" {
+  account_id   = "byobcdn-fetch-runner"
+  display_name = "byobcdn-fetch-runner"
+}
+
 resource "google_service_account" "byobcdn-tact-runner" {
   account_id   = "byobcdn-tact-runner"
   display_name = "byobcdn-tact-runner"
 }
 
+resource "google_service_account" "byobcdn-watch-runner" {
+  account_id   = "byobcdn-watch-runner"
+  display_name = "byobcdn-watch-runner"
+}
+
 data "google_iam_policy" "storage" {
   binding {
     members = [
+      "serviceAccount:${google_service_account.byobcdn-fetch-runner.email}",
       "serviceAccount:${google_service_account.byobcdn-tact-runner.email}",
     ]
     role = "roles/storage.objectAdmin"
+  }
+  binding {
+    members = [
+      "serviceAccount:${google_service_account.byobcdn-watch-runner.email}",
+    ]
+    role = "roles/storage.objectViewer"
   }
 }
 
@@ -147,11 +164,6 @@ resource "google_cloud_scheduler_job" "byobcdn-root" {
   }
 }
 
-resource "google_service_account" "byobcdn-fetch-runner" {
-  account_id   = "byobcdn-fetch-runner"
-  display_name = "byobcdn-fetch-runner"
-}
-
 resource "google_cloudfunctions_function" "byobcdn-fetch" {
   name                  = "byobcdn-fetch"
   runtime               = "nodejs18"
@@ -172,7 +184,19 @@ resource "google_cloudfunctions_function" "byobcdn-fetch" {
   timeouts {}
 }
 
-data "google_iam_policy" "byobcdn-fetch" {}
+resource "google_service_account" "byobcdn-fetch-invoker" {
+  account_id   = "byobcdn-fetch-invoker"
+  display_name = "byobcdn-fetch-invoker"
+}
+
+data "google_iam_policy" "byobcdn-fetch" {
+  binding {
+    members = [
+      "serviceAccount:${google_service_account.byobcdn-fetch-invoker.email}",
+    ]
+    role = "roles/cloudfunctions.invoker"
+  }
+}
 
 resource "google_cloudfunctions_function_iam_policy" "byobcdn-fetch" {
   cloud_function = google_cloudfunctions_function.byobcdn-fetch.name
