@@ -244,3 +244,34 @@ resource "google_cloudfunctions_function_iam_policy" "byobcdn-fetch" {
   cloud_function = google_cloudfunctions_function.byobcdn-fetch.name
   policy_data    = data.google_iam_policy.byobcdn-fetch.policy_data
 }
+
+resource "google_cloudfunctions_function" "byobcdn-watch" {
+  name                  = "byobcdn-watch"
+  runtime               = "nodejs18"
+  entry_point           = "watch"
+  available_memory_mb   = 128
+  service_account_email = google_service_account.byobcdn-watch-runner.email
+  environment_variables = {
+    BYOBCDN_BUCKET = var.bucket
+  }
+  event_trigger {
+    event_type = "google.storage.object.finalize"
+    resource   = "projects/_/buckets/${var.bucket}"
+    failure_policy {
+      retry = true
+    }
+  }
+  lifecycle {
+    ignore_changes = [
+      labels["deployment-tool"],
+    ]
+  }
+  timeouts {}
+}
+
+data "google_iam_policy" "byobcdn-watch" {}
+
+resource "google_cloudfunctions_function_iam_policy" "byobcdn-watch" {
+  cloud_function = google_cloudfunctions_function.byobcdn-watch.name
+  policy_data    = data.google_iam_policy.byobcdn-watch.policy_data
+}
