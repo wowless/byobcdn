@@ -32,8 +32,8 @@ function mkurl(kind, hash, suffix) {
   return `http://level3.blizzard.com/tpr/wow/${kind}/${ab}/${cd}/${hash}${suffix || ''}`;
 }
 
-exports.watch = async (event, _) => {
-  const file = bucket.file(event.name);
+async function processFile(name) {
+  const file = bucket.file(name);
   if (file.name.match(/^byobcdn\/tact\/[^/]+\/[^/]+\/versions\//)) {
     const content = await file.download();
     const config = tactpipe.parse(content.toString()).data[0];
@@ -66,4 +66,8 @@ exports.watch = async (event, _) => {
     }
     await Promise.all(tasks);
   }
+}
+
+exports.watch = async (event, _) => {
+  await processFile(event.name);
 };
