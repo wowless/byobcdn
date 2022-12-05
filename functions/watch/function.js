@@ -24,11 +24,11 @@ async function mktask(body) {
   });
 }
 
-function mkurl(kind, hash) {
+function mkurl(kind, hash, suffix) {
   const ab = hash.slice(0, 2);
   const cd = hash.slice(2, 4);
   // TODO get host and path prefix from cdns files
-  return `http://level3.blizzard.com/tpr/wow/${kind}/${ab}/${cd}/${hash}`;
+  return `http://level3.blizzard.com/tpr/wow/${kind}/${ab}/${cd}/${hash}${suffix || ''}`;
 }
 
 exports.watch = async (event, _) => {
@@ -59,6 +59,10 @@ exports.watch = async (event, _) => {
         path: 'archive',
         url: mkurl('data', archive),
       }));
+      if (tasks.length >= 20) {
+        await Promise.all(tasks);
+        tasks.length = 0;
+      }
     }
     await Promise.all(tasks);
   }
