@@ -27,5 +27,5 @@
     "prepublish": "npx peggy grammar.pegjs",
     "test": "node test.js"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
