@@ -1,5 +1,6 @@
 const storage = require('@google-cloud/storage');
 const tasks = require('@google-cloud/tasks');
+const tactcfg = require('tactcfg');
 const tactpipe = require('tactpipe');
 
 const bucket = new storage.Storage().bucket(process.env.BYOBCDN_BUCKET);
@@ -47,8 +48,7 @@ exports.watch = async (event, _) => {
   } else if (file.name.match(/^byobcdn\/tact\/cdn\/[0-9a-f]+$/)) {
     const content = await file.download();
     const tasks = [];
-    // TODO properly parse config files
-    for (const archive of content.toString().split("\n")[2].split(" ").slice(2)) {
+    for (const archive of tactcfg.parse(content.toString()).data.archives) {
       tasks.push(mktask({
         name: archive,
         path: 'index',
