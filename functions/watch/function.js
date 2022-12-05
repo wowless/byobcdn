@@ -44,5 +44,22 @@ exports.watch = async (event, _) => {
       path: 'tact/cdn',
       url: mkurl('config', config.CDNConfig),
     });
+  } else if (file.name.match(/^byobcdn\/tact\/cdn\/[0-9a-f]+$/)) {
+    const content = await file.download();
+    const tasks = [];
+    // TODO properly parse config files
+    for (const archive of content.toString().split("\n")[2].split(" ").slice(2)) {
+      tasks.push(mktask({
+        name: archive,
+        path: 'index',
+        url: mkurl('data', archive, '.index'),
+      }));
+      tasks.push(mktask({
+        name: archive,
+        path: 'archive',
+        url: mkurl('data', archive),
+      }));
+    }
+    await Promise.all(tasks);
   }
 };
