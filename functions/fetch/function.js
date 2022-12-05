@@ -6,8 +6,9 @@ const md5 = require('md5');
 const bucket = new storage.Storage().bucket(process.env.BYOBCDN_BUCKET);
 
 functions.http('function', async (req, res) => {
-  const result = await axios.get(req.body.url);
-  const file = bucket.file(`byobcdn/${req.body.path}/${md5(result.data)}`);
+  const {url, path, name} = req.body;
+  const result = await axios.get(url);
+  const file = bucket.file(`byobcdn/${path}/${name || md5(result.data)}`);
   var written = false;
   try {
     await file.save(result.data, {
