@@ -9,7 +9,7 @@ functions.http('function', async (req, res) => {
   const {url, path, name} = req.body;
   if (name) {
     const file = bucket.file(`byobcdn/${path}/${name}`);
-    const exists = await file.exists();
+    const [exists] = await file.exists();
     if (!exists) {
       const result = await axios.get(url);
       await file.save(result.data);
