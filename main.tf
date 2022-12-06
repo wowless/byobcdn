@@ -48,6 +48,7 @@ data "google_iam_policy" "storage" {
   }
   binding {
     members = [
+      google_service_account.byobcdn-process-runner.member,
       google_service_account.byobcdn-watch-runner.member,
     ]
     role = "roles/storage.objectViewer"
