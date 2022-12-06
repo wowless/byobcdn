@@ -249,7 +249,7 @@ resource "google_cloudfunctions_function" "byobcdn-watch" {
   name                  = "byobcdn-watch"
   runtime               = "nodejs18"
   entry_point           = "watch"
-  available_memory_mb   = 128
+  available_memory_mb   = 256
   service_account_email = google_service_account.byobcdn-watch-runner.email
   environment_variables = {
     BYOBCDN_BUCKET         = var.bucket
