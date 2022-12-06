@@ -220,7 +220,7 @@ resource "google_service_account" "byobcdn-fetch-invoker" {
 data "google_iam_policy" "byobcdn-fetch-invoker" {
   binding {
     members = [
-      google_service_account.byobcdn-watch-runner.member,
+      google_service_account.byobcdn-process-runner.member,
     ]
     role = "roles/iam.serviceAccountUser"
   }
@@ -249,13 +249,12 @@ resource "google_cloudfunctions_function" "byobcdn-watch" {
   name                  = "byobcdn-watch"
   runtime               = "nodejs18"
   entry_point           = "watch"
-  available_memory_mb   = 256
+  available_memory_mb   = 128
   service_account_email = google_service_account.byobcdn-watch-runner.email
   environment_variables = {
-    BYOBCDN_BUCKET         = var.bucket
-    BYOBCDN_FETCH_ENDPOINT = google_cloudfunctions_function.byobcdn-fetch.https_trigger_url
-    BYOBCDN_FETCH_INVOKER  = google_service_account.byobcdn-fetch-invoker.email
-    BYOBCDN_FETCH_QUEUE    = google_cloud_tasks_queue.byobcdn-fetch.id
+    BYOBCDN_PROCESS_ENDPOINT = google_cloudfunctions_function.byobcdn-process.https_trigger_url
+    BYOBCDN_PROCESS_INVOKER  = google_service_account.byobcdn-process-invoker.email
+    BYOBCDN_PROCESS_QUEUE    = google_cloud_tasks_queue.byobcdn-process.id
   }
   event_trigger {
     event_type = "google.storage.object.finalize"
@@ -287,7 +286,7 @@ resource "google_cloud_tasks_queue" "byobcdn-fetch" {
 data "google_iam_policy" "byobcdn-fetch-tasks-queue" {
   binding {
     members = [
-      google_service_account.byobcdn-watch-runner.member,
+      google_service_account.byobcdn-process-runner.member,
     ]
     role = "roles/cloudtasks.enqueuer"
   }
@@ -296,4 +295,88 @@ data "google_iam_policy" "byobcdn-fetch-tasks-queue" {
 resource "google_cloud_tasks_queue_iam_policy" "byobcdn-fetch" {
   name        = google_cloud_tasks_queue.byobcdn-fetch.name
   policy_data = data.google_iam_policy.byobcdn-fetch-tasks-queue.policy_data
+}
+
+resource "google_service_account" "byobcdn-process-runner" {
+  account_id   = "byobcdn-process-runner"
+  display_name = "byobcdn-process-runner"
+}
+
+data "google_iam_policy" "byobcdn-process-runner" {}
+
+resource "google_service_account_iam_policy" "byobcdn-process-runner" {
+  policy_data        = data.google_iam_policy.byobcdn-process-runner.policy_data
+  service_account_id = google_service_account.byobcdn-process-runner.name
+}
+
+resource "google_cloudfunctions_function" "byobcdn-process" {
+  name                  = "byobcdn-process"
+  runtime               = "nodejs18"
+  entry_point           = "function"
+  available_memory_mb   = 256
+  trigger_http          = true
+  service_account_email = google_service_account.byobcdn-process-runner.email
+  environment_variables = {
+    BYOBCDN_FETCH_ENDPOINT = google_cloudfunctions_function.byobcdn-fetch.https_trigger_url
+    BYOBCDN_FETCH_INVOKER  = google_service_account.byobcdn-fetch-invoker.email
+    BYOBCDN_FETCH_QUEUE    = google_cloud_tasks_queue.byobcdn-fetch.id
+  }
+  lifecycle {
+    ignore_changes = [
+      labels["deployment-tool"],
+    ]
+  }
+  timeouts {}
+}
+
+data "google_iam_policy" "byobcdn-process" {
+  binding {
+    members = [
+      google_service_account.byobcdn-process-invoker.member,
+    ]
+    role = "roles/cloudfunctions.invoker"
+  }
+}
+
+resource "google_cloudfunctions_function_iam_policy" "byobcdn-process" {
+  cloud_function = google_cloudfunctions_function.byobcdn-process.name
+  policy_data    = data.google_iam_policy.byobcdn-process.policy_data
+}
+
+resource "google_cloud_tasks_queue" "byobcdn-process" {
+  name     = "byobcdn-process"
+  location = "us-central1"
+}
+
+data "google_iam_policy" "byobcdn-process-tasks-queue" {
+  binding {
+    members = [
+      google_service_account.byobcdn-watch-runner.member,
+    ]
+    role = "roles/cloudtasks.enqueuer"
+  }
+}
+
+resource "google_cloud_tasks_queue_iam_policy" "byobcdn-process" {
+  name        = google_cloud_tasks_queue.byobcdn-process.name
+  policy_data = data.google_iam_policy.byobcdn-process-tasks-queue.policy_data
+}
+
+resource "google_service_account" "byobcdn-process-invoker" {
+  account_id   = "byobcdn-process-invoker"
+  display_name = "byobcdn-process-invoker"
+}
+
+data "google_iam_policy" "byobcdn-process-invoker" {
+  binding {
+    members = [
+      google_service_account.byobcdn-watch-runner.member,
+    ]
+    role = "roles/iam.serviceAccountUser"
+  }
+}
+
+resource "google_service_account_iam_policy" "byobcdn-process-invoker" {
+  policy_data        = data.google_iam_policy.byobcdn-process-invoker.policy_data
+  service_account_id = google_service_account.byobcdn-process-invoker.name
 }
