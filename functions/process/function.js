@@ -133,29 +133,6 @@ const handlers = [
       }
     },
   },
-  {
-    name: 'archive index',
-    pattern: /^byobcdn\/index\/[0-9a-f]+$/,
-    tasks: function*(content, name, bucketname) {
-      const archiveName = name.slice(-32);
-      const bucket = storage.bucket(bucketname);
-      const map = new Map();
-      for (const entry of parseArchiveIndex(content, archiveName)) {
-        const value = {
-          offset: entry.offset,
-          size: entry.size,
-        };
-        if (!map.has(entry.ekey)) {
-          map.set(entry.ekey, [value]);
-        } else {
-          map.get(entry.ekey).push(value);
-        }
-      }
-      for (const [k, v] of map.entries()) {
-        yield bucket.file(`byobcdn/ekey/${k}/${archiveName}`).save(JSON.stringify(v));
-      }
-    },
-  },
 ];
 
 functions.http('function', async (req, res) => {
