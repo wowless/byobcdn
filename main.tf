@@ -316,6 +316,7 @@ resource "google_cloudfunctions_function" "byobcdn-process" {
   entry_point           = "function"
   available_memory_mb   = 256
   trigger_http          = true
+  timeout               = 300
   service_account_email = google_service_account.byobcdn-process-runner.email
   environment_variables = {
     BYOBCDN_FETCH_ENDPOINT = google_cloudfunctions_function.byobcdn-fetch.https_trigger_url
@@ -327,7 +328,6 @@ resource "google_cloudfunctions_function" "byobcdn-process" {
       labels["deployment-tool"],
     ]
   }
-  timeouts {}
 }
 
 data "google_iam_policy" "byobcdn-process" {
@@ -380,4 +380,45 @@ data "google_iam_policy" "byobcdn-process-invoker" {
 resource "google_service_account_iam_policy" "byobcdn-process-invoker" {
   policy_data        = data.google_iam_policy.byobcdn-process-invoker.policy_data
   service_account_id = google_service_account.byobcdn-process-invoker.name
+}
+
+resource "google_service_account" "byobcdn-www-runner" {
+  account_id   = "byobcdn-www-runner"
+  display_name = "byobcdn-www-runner"
+}
+
+data "google_iam_policy" "byobcdn-www-runner" {}
+
+resource "google_service_account_iam_policy" "byobcdn-www-runner" {
+  policy_data        = data.google_iam_policy.byobcdn-www-runner.policy_data
+  service_account_id = google_service_account.byobcdn-www-runner.name
+}
+
+resource "google_cloudfunctions_function" "byobcdn-www" {
+  name                  = "byobcdn-www"
+  runtime               = "nodejs18"
+  entry_point           = "function"
+  available_memory_mb   = 256
+  trigger_http          = true
+  service_account_email = google_service_account.byobcdn-www-runner.email
+  lifecycle {
+    ignore_changes = [
+      labels["deployment-tool"],
+    ]
+  }
+  timeouts {}
+}
+
+data "google_iam_policy" "byobcdn-www" {
+  binding {
+    members = [
+      "allUsers",
+    ]
+    role = "roles/cloudfunctions.invoker"
+  }
+}
+
+resource "google_cloudfunctions_function_iam_policy" "byobcdn-www" {
+  cloud_function = google_cloudfunctions_function.byobcdn-www.name
+  policy_data    = data.google_iam_policy.byobcdn-www.policy_data
 }
