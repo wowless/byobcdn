@@ -1,12 +1,14 @@
+const { Datastore } = require('@google-cloud/datastore');
 const functions = require('@google-cloud/functions-framework');
-const {Storage} = require('@google-cloud/storage');
-const {CloudTasksClient} = require('@google-cloud/tasks');
-const {parse: tactcfg} = require('tactcfg');
-const {parse: tactpipe} = require('tactpipe');
-const {Parser} = require('binary-parser');
+const { Storage } = require('@google-cloud/storage');
+const { CloudTasksClient } = require('@google-cloud/tasks');
+const { parse: tactcfg } = require('tactcfg');
+const { parse: tactpipe } = require('tactpipe');
+const { Parser } = require('binary-parser');
 const assert = require('node:assert');
 const md5 = require('md5');
 
+const datastore = new Datastore();
 const storage = new Storage();
 const taskclient = new CloudTasksClient();
 
@@ -99,17 +101,34 @@ function parseArchiveIndex(content, name) {
   return result;
 }
 
+async function batchit(fn, size, gen) {
+  const batch = [];
+  let numElements = 0;
+  for await (const element of gen()) {
+    numElements++;
+    batch.push(element);
+    if (batch.length == size) {
+      await fn(batch);
+      batch.length = 0;
+    }
+  }
+  if (batch.length != 0) {
+    await fn(batch);
+  }
+  console.log('processed %d elements', numElements);
+}
+
 const handlers = [
   {
     name: 'tact product version',
     pattern: /^byobcdn\/tact\/[^/]+\/[^/]+\/versions\//,
-    tasks: function*(content) {
+    process: async (content) => {
       const config = tactpipe(content.toString()).data[0];
-      yield mkfetchtask({
+      await mkfetchtask({
         path: 'tact/build',
         url: mkurl('config', config.BuildConfig),
       });
-      yield mkfetchtask({
+      await mkfetchtask({
         path: 'tact/cdn',
         url: mkurl('config', config.CDNConfig),
       });
@@ -118,42 +137,64 @@ const handlers = [
   {
     name: 'tact cdn config',
     pattern: /^byobcdn\/tact\/cdn\/[0-9a-f]+$/,
-    tasks: function*(content) {
-      for (const archive of tactcfg(content.toString()).data.archives) {
-        yield mkfetchtask({
-          name: archive,
-          path: 'index',
-          url: mkurl('data', archive, '.index'),
-        });
-        yield mkfetchtask({
-          name: archive,
-          path: 'archive',
-          url: mkurl('data', archive),
-        });
-      }
+    process: async (content) => {
+      await batchit(x => Promise.all(x), 20, function* () {
+        for (const archive of tactcfg(content.toString()).data.archives) {
+          yield mkfetchtask({
+            name: archive,
+            path: 'index',
+            url: mkurl('data', archive, '.index'),
+          });
+          yield mkfetchtask({
+            name: archive,
+            path: 'archive',
+            url: mkurl('data', archive),
+          });
+        }
+      });
+    },
+  },
+  {
+    name: 'archive index',
+    pattern: /^byobcdn\/index\/[0-9a-f]+$/,
+    process: async (content, name) => {
+      const archiveName = name.slice(-32);
+      console.log('deleting existing entries');
+      await batchit(x => datastore.delete(x), 500, async function* () {
+        const query = datastore
+          .createQuery('ArchiveEntry')
+          .select('__key__')
+          .filter('archive', archiveName);
+        for await (const entity of query.runStream()) {
+          yield entity[datastore.KEY];
+        }
+      });
+      console.log('saving new entries');
+      await batchit(x => datastore.save(x), 500, function* () {
+        for (const entry of parseArchiveIndex(content, archiveName)) {
+          yield {
+            key: datastore.key(['ArchiveEntry']),
+            data: {
+              archive: archiveName,
+              ekey: entry.ekey,
+              offset: entry.offset,
+              size: entry.size,
+            },
+          };
+        }
+      });
     },
   },
 ];
 
 functions.http('function', async (req, res) => {
-  const {bucket, name} = req.body;
+  const { bucket, name } = req.body;
   for (const handler of handlers) {
     if (name.match(handler.pattern)) {
-      var total = 0;
-      const tasks = [];
       const [content] = await storage.bucket(bucket).file(name).download();
-      for (const task of handler.tasks(content, name, bucket)) {
-        total++;
-        tasks.push(task);
-        if (tasks.length >= 20) {
-          await Promise.all(tasks);
-          tasks.length = 0;
-        }
-      }
-      await Promise.all(tasks);
+      await handler.process(content, name);
       res.json({
         name: handler.name,
-        count: total,
       });
       return;
     }
