@@ -1,16 +1,13 @@
-html
-  head
-    title tactless.dev
-  body
-    p this is tactless.dev
-    p you are looking at archive #{id}
-    table
+extends chrome
+block content
+  p you are looking at archive #{id}
+  table
+    tr
+      th encoding key
+      th offset
+      th size
+    each entry in archiveEntries
       tr
-        th encoding key
-        th offset
-        th size
-      each entry in archiveEntries
-        tr
-          td #[a(href='../e/' + entry.ekey)= entry.ekey]
-          td= entry.offset
-          td= entry.size
+        td #[a(href='../e/' + entry.ekey)= entry.ekey]
+        td= entry.offset
+        td= entry.size
