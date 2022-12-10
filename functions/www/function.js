@@ -1,4 +1,7 @@
 const datastore = new (require('@google-cloud/datastore').Datastore)();
+const bucket = new (require('@google-cloud/storage').Storage)().bucket('byobcdn.wowless.dev');
+const { parse: tactcfg } = require('tactcfg');
+const { parse: tactpipe } = require('tactpipe');
 
 const app = require('express')();
 app.set('view engine', 'pug');
@@ -41,6 +44,15 @@ app.get('/a/:id', async (req, res) => {
   });
 });
 
+app.get('/c/:id', async (req, res) => {
+  const file = bucket.file(`byobcdn/tact/cdn/${req.params.id}`);
+  const [content] = await file.download();
+  res.render('cdnconfig', {
+    config: tactcfg(content.toString()).data,
+    id: req.params.id,
+  });
+});
+
 app.get('/e/:id', async (req, res) => {
   const [entities] = await datastore
     .createQuery('ArchiveEntry')
@@ -49,6 +61,15 @@ app.get('/e/:id', async (req, res) => {
     .run();
   res.render('ekey', {
     archiveEntries: entities,
+    id: req.params.id,
+  });
+});
+
+app.get('/v/:id', async (req, res) => {
+  const file = bucket.file(`byobcdn/tactpoints/versions/${req.params.id}`);
+  const [content] = await file.download();
+  res.render('versions', {
+    config: tactpipe(content.toString()).data[0],
     id: req.params.id,
   });
 });

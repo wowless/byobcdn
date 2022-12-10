@@ -1,10 +1,5 @@
 extends chrome
 block content
-  a(href='a/8e9e7bf9d660c2985357273e7f1cd05e') example archive
-  br
-  a(href='e/412e084d85bc183201434c3d54ac8108') example encoding key
-  br
-  br
   table
     tr
       th product
@@ -13,5 +8,5 @@ block content
     each p of products
       tr
         td= p.name
-        td= p.versions.hash
+        td #[a(href='v/' + p.versions.hash)= p.versions.hash]
         td= p.cdns.hash

@@ -1,0 +1,10 @@
+extends chrome
+block content
+  p you are looking at cdn config #{id}
+  table
+    tr
+      td archives
+      td
+        each h in config.archives
+          a(href='../a/' + h) #{h}
+          br
