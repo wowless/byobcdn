@@ -3,6 +3,7 @@
     "tact": "npx functions-framework"
   },
   "dependencies": {
+    "@google-cloud/datastore": "^7.0.0",
     "@google-cloud/functions-framework": "^3.1.2",
     "@google-cloud/storage": "^6.7.0",
     "axios": "^1.2.0",
