@@ -121,7 +121,7 @@ async function batchit(fn, size, gen) {
 const handlers = [
   {
     name: 'tact product version',
-    pattern: /^byobcdn\/tact\/[^/]+\/[^/]+\/versions\//,
+    pattern: /^byobcdn\/tactpoints\/versions\//,
     process: async (content) => {
       const config = tactpipe(content.toString()).data[0];
       await mkfetchtask({
