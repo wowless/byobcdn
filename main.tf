@@ -50,6 +50,7 @@ data "google_iam_policy" "storage" {
     members = [
       google_service_account.byobcdn-process-runner.member,
       google_service_account.byobcdn-watch-runner.member,
+      google_service_account.byobcdn-www-runner.member,
     ]
     role = "roles/storage.objectViewer"
   }
