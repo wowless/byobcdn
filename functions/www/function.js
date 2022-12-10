@@ -4,8 +4,29 @@ const app = require('express')();
 app.set('view engine', 'pug');
 app.engine('pug', require('pug').__express);
 
-app.get('/', (_, res) => {
-  res.render('index');
+app.get('/', async (_, res) => {
+  const [entities] = await datastore
+    .createQuery('TactPoint')
+    .order('timestamp', { descending: true })
+    .limit(200)
+    .run();
+  const products = new Map();
+  for (const e of entities) {
+    if (!products.has(e.product)) {
+      products.set(e.product, {
+        name: e.product,
+      });
+    }
+    const p = products.get(e.product);
+    if (!p[e.endpoint] || p[e.endpoint].timestamp < e.timestamp) {
+      p[e.endpoint] = e;
+    }
+  }
+  res.render('index', {
+    products: Array
+        .from(products.values())
+        .sort((a, b) => a.name.localeCompare(b.name))
+  });
 });
 
 app.get('/a/:id', async (req, res) => {
