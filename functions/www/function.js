@@ -32,7 +32,7 @@ app.get('/', async (_, res) => {
   });
 });
 
-app.get('/a/:id', async (req, res) => {
+app.get('/archive/:id', async (req, res) => {
   const [entities] = await datastore
     .createQuery('ArchiveEntry')
     .filter('archive', req.params.id)
@@ -44,7 +44,7 @@ app.get('/a/:id', async (req, res) => {
   });
 });
 
-app.get('/b/:id', async (req, res) => {
+app.get('/build/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tact/build/${req.params.id}`);
   const [content] = await file.download();
   res.render('buildconfig', {
@@ -53,7 +53,7 @@ app.get('/b/:id', async (req, res) => {
   });
 });
 
-app.get('/c/:id', async (req, res) => {
+app.get('/cdn/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tact/cdn/${req.params.id}`);
   const [content] = await file.download();
   res.render('cdnconfig', {
@@ -62,7 +62,7 @@ app.get('/c/:id', async (req, res) => {
   });
 });
 
-app.get('/e/:id', async (req, res) => {
+app.get('/ekey/:id', async (req, res) => {
   const [entities] = await datastore
     .createQuery('ArchiveEntry')
     .filter('ekey', req.params.id)
@@ -74,7 +74,7 @@ app.get('/e/:id', async (req, res) => {
   });
 });
 
-app.get('/v/:id', async (req, res) => {
+app.get('/versions/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tactpoints/versions/${req.params.id}`);
   const [content] = await file.download();
   res.render('versions', {

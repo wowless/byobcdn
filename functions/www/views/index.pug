@@ -8,5 +8,5 @@ block content
     each p of products
       tr
         td= p.name
-        td #[a(href='v/' + p.versions.hash)= p.versions.hash]
+        td #[a(href='versions/' + p.versions.hash)= p.versions.hash]
         td= p.cdns.hash
