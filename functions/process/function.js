@@ -120,6 +120,18 @@ async function batchit(fn, size, gen) {
 
 const handlers = [
   {
+    name: 'tact build config',
+    pattern: /^byobcdn\/tact\/build\//,
+    process: async (content) => {
+      const hash = tactcfg(content.toString()).data.encoding[1];
+      await mkfetchtask({
+        name: hash,
+        path: 'encoding',
+        url: mkurl('data', hash),
+      });
+    },
+  },
+  {
     name: 'tact product version',
     pattern: /^byobcdn\/tactpoints\/versions\//,
     process: async (content) => {
