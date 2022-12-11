@@ -44,6 +44,15 @@ app.get('/a/:id', async (req, res) => {
   });
 });
 
+app.get('/b/:id', async (req, res) => {
+  const file = bucket.file(`byobcdn/tact/build/${req.params.id}`);
+  const [content] = await file.download();
+  res.render('buildconfig', {
+    config: tactcfg(content.toString()).data,
+    id: req.params.id,
+  });
+});
+
 app.get('/c/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tact/cdn/${req.params.id}`);
   const [content] = await file.download();

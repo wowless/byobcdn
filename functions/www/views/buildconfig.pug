@@ -1,0 +1,13 @@
+extends chrome
+block content
+  p you are looking at build config #{id}
+  table
+    tr
+      td root (content hash)
+      td= config.root[0]
+    tr
+      td encoding (content hash)
+      td= config.encoding[0]
+    tr
+      td encoding (encoding hash)
+      td= config.encoding[1]
