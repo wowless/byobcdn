@@ -1,7 +1,6 @@
 const datastore = new (require('@google-cloud/datastore').Datastore)();
 const bucket = new (require('@google-cloud/storage').Storage)().bucket('byobcdn.wowless.dev');
-const { parse: tactcfg } = require('tactcfg');
-const { parse: tactpipe } = require('tactpipe');
+const tactless = require('tactless');
 
 const app = require('express')();
 app.set('view engine', 'pug');
@@ -48,7 +47,7 @@ app.get('/build/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tact/build/${req.params.id}`);
   const [content] = await file.download();
   res.render('buildconfig', {
-    config: tactcfg(content.toString()).data,
+    config: tactless.config(content.toString()).data,
     id: req.params.id,
   });
 });
@@ -57,7 +56,7 @@ app.get('/cdn/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tact/cdn/${req.params.id}`);
   const [content] = await file.download();
   res.render('cdnconfig', {
-    config: tactcfg(content.toString()).data,
+    config: tactless.config(content.toString()).data,
     id: req.params.id,
   });
 });
@@ -78,7 +77,7 @@ app.get('/versions/:id', async (req, res) => {
   const file = bucket.file(`byobcdn/tactpoints/versions/${req.params.id}`);
   const [content] = await file.download();
   res.render('versions', {
-    config: tactpipe(content.toString()).data[0],
+    config: tactless.pipe(content.toString()).data[0],
     id: req.params.id,
   });
 });

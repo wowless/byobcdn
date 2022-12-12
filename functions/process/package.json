@@ -4,9 +4,6 @@
     "@google-cloud/functions-framework": "^3.1.2",
     "@google-cloud/storage": "^6.8.0",
     "@google-cloud/tasks": "^3.0.5",
-    "binary-parser": "^2.2.1",
-    "md5": "^2.3.0",
-    "tactcfg": "^0.1.1",
-    "tactpipe": "^0.1.6"
+    "tactless": "^0.0.2"
   }
 }

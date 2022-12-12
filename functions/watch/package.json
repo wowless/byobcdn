@@ -1,8 +1,6 @@
 {
   "dependencies": {
     "@google-cloud/storage": "^6.7.0",
-    "@google-cloud/tasks": "^3.0.5",
-    "tactcfg": "^0.1.1",
-    "tactpipe": "^0.1.6"
+    "@google-cloud/tasks": "^3.0.5"
   }
 }
