@@ -1,10 +1,8 @@
-const { Datastore } = require('@google-cloud/datastore');
 const functions = require('@google-cloud/functions-framework');
 const { Storage } = require('@google-cloud/storage');
 const { CloudTasksClient } = require('@google-cloud/tasks');
 const tactless = require('tactless');
 
-const datastore = new Datastore();
 const storage = new Storage();
 const taskclient = new CloudTasksClient();
 
@@ -95,37 +93,6 @@ const handlers = [
             path: 'archive',
             url: mkurl('data', archive),
           });
-        }
-      });
-    },
-  },
-  {
-    name: 'archive index',
-    pattern: /^byobcdn\/index\/[0-9a-f]+$/,
-    process: async (content, name) => {
-      const archiveName = name.slice(-32);
-      console.log('deleting existing entries');
-      await batchit(x => datastore.delete(x), 500, async function* () {
-        const query = datastore
-          .createQuery('ArchiveEntry')
-          .select('__key__')
-          .filter('archive', archiveName);
-        for await (const entity of query.runStream()) {
-          yield entity[datastore.KEY];
-        }
-      });
-      console.log('saving new entries');
-      await batchit(x => datastore.save(x), 500, function* () {
-        for (const entry of tactless.index(content, archiveName)) {
-          yield {
-            key: datastore.key(['ArchiveEntry']),
-            data: {
-              archive: archiveName,
-              ekey: entry.ekey,
-              offset: entry.offset,
-              size: entry.size,
-            },
-          };
         }
       });
     },
