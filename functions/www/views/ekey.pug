@@ -1,13 +1,3 @@
 extends chrome
 block content
   p you are looking at ekey #{id}
-  table
-    tr
-      th archive
-      th offset
-      th size
-    each entry in archiveEntries
-      tr
-        td #[a(href='../archive/' + entry.archive)= entry.archive]
-        td= entry.offset
-        td= entry.size

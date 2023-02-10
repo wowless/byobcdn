@@ -32,13 +32,7 @@ app.get('/', async (_, res) => {
 });
 
 app.get('/archive/:id', async (req, res) => {
-  const [entities] = await datastore
-    .createQuery('ArchiveEntry')
-    .filter('archive', req.params.id)
-    .limit(50)
-    .run();
   res.render('archive', {
-    archiveEntries: entities,
     id: req.params.id,
   });
 });
@@ -62,13 +56,7 @@ app.get('/cdn/:id', async (req, res) => {
 });
 
 app.get('/ekey/:id', async (req, res) => {
-  const [entities] = await datastore
-    .createQuery('ArchiveEntry')
-    .filter('ekey', req.params.id)
-    .limit(50)
-    .run();
   res.render('ekey', {
-    archiveEntries: entities,
     id: req.params.id,
   });
 });
