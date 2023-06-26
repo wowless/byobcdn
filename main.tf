@@ -403,6 +403,9 @@ resource "google_cloudfunctions_function" "byobcdn-www" {
   trigger_http          = true
   service_account_email = google_service_account.byobcdn-www-runner.email
   ingress_settings      = "ALLOW_INTERNAL_AND_GCLB"
+  environment_variables = {
+    BYOBCDN_BUCKET = var.bucket
+  }
   lifecycle {
     ignore_changes = [
       labels["deployment-tool"],
