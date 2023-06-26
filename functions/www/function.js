@@ -1,5 +1,5 @@
 const datastore = new (require('@google-cloud/datastore').Datastore)();
-const bucket = new (require('@google-cloud/storage').Storage)().bucket('byobcdn.wowless.dev');
+const bucket = new (require('@google-cloud/storage').Storage)().bucket(process.env.BYOBCDN_BUCKET);
 const tactless = require('tactless');
 
 const app = require('express')();
