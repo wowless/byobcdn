@@ -10,6 +10,7 @@ const products = [
   "wow_classic_era",
   "wow_classic_era_ptr",
   "wow_classic_ptr",
+  "wowxptr",
 ];
 
 const regions = [
