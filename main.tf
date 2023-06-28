@@ -174,7 +174,7 @@ resource "google_cloudfunctions_function_iam_policy" "byobcdn-root" {
 
 resource "google_cloud_scheduler_job" "byobcdn-root" {
   name             = "byobcdn-root"
-  schedule         = "* * * * *"
+  schedule         = "*/5 * * * *"
   time_zone        = "Etc/UTC"
   attempt_deadline = "50s"
   http_target {
