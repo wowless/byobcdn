@@ -72,12 +72,18 @@ resource "google_cloudfunctions_function" "byobcdn-tact" {
   runtime               = "nodejs18"
   entry_point           = "function"
   available_memory_mb   = 128
-  trigger_http          = true
   max_instances         = 5
   timeout               = 60
   service_account_email = google_service_account.byobcdn-tact-runner.email
   environment_variables = {
     BYOBCDN_BUCKET = var.bucket
+  }
+  event_trigger {
+    event_type = "google.pubsub.topic.publish"
+    resource   = google_pubsub_topic.byobcdn-root.id
+    failure_policy {
+      retry = false
+    }
   }
   lifecycle {
     ignore_changes = [
