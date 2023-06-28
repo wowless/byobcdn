@@ -73,7 +73,7 @@ resource "google_cloudfunctions_function" "byobcdn-tact" {
   entry_point           = "function"
   available_memory_mb   = 128
   trigger_http          = true
-  max_instances         = 25
+  max_instances         = 5
   timeout               = 60
   service_account_email = google_service_account.byobcdn-tact-runner.email
   environment_variables = {
